@@ -1,0 +1,59 @@
+# Run everything with:  docker compose up -d --build
+#   App (frontend):  http://localhost:3000   (first time: http://localhost:3000/setup)
+#   phpMyAdmin:      http://localhost:8081
+# Change the passwords before using this anywhere except your own computer.
+services:
+  db:
+    image: mariadb:11
+    environment:
+      MARIADB_DATABASE: honey_management
+      MARIADB_USER: honey
+      MARIADB_PASSWORD: honeypass
+      MARIADB_ROOT_PASSWORD: rootpass
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    image: muneza123/honey-management-backend:latest
+    environment:
+      DB_HOST: db
+      DB_NAME: honey_management
+      DB_USER: honey
+      DB_PASS: honeypass
+      APP_CURRENCY: USD
+      APP_TIMEZONE: Africa/Kigali
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    image: muneza123/honey-management-frontend:latest
+    environment:
+      BACKEND_URL: http://backend:3000
+    ports:
+      - "3000:8080"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    environment:
+      PMA_HOST: db
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+volumes:
+  dbdata:

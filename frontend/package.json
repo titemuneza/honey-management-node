@@ -1,0 +1,14 @@
+{
+  "name": "honey-management-frontend",
+  "version": "1.0.0",
+  "description": "Honey Management System frontend: serves the web UI and forwards /api and /setup to the backend.",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {}
+}
